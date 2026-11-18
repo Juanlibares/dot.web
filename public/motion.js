@@ -35,14 +35,18 @@ function updateStacks() {
       card.style.setProperty('--stack-scale', 1 - progress * .035);
       card.style.setProperty('--stack-shade', progress * .07);
     });
-    // Mask the covered card down to the incoming card's top edge, regardless
-    // of either card's height. Recompute on reverse scroll and resize as well.
+    // Finish masking the previous card as the incoming card reaches its sticky
+    // position, which can differ when the cards have different heights.
     cards.forEach((card, index) => {
       const next = cards[index + 1];
+      if (!next) return;
       const bounds = card.getBoundingClientRect();
-      const scale = bounds.height / card.offsetHeight || 1;
-      const covered = next ? Math.max(0, Math.min(bounds.height, bounds.bottom - next.getBoundingClientRect().top)) / scale : 0;
-      card.style.setProperty('--stack-covered', `${covered}px`);
+      const nextTop = next.getBoundingClientRect().top;
+      const stickyTop = Math.min(header + 24, innerHeight - next.offsetHeight - 28);
+      const overlap = Math.max(0, Math.min(bounds.height, bounds.bottom - nextTop));
+      const takeover = Math.max(0, 1 - Math.max(0, nextTop - stickyTop) / 48);
+      const covered = Math.max(overlap / (bounds.height || 1), takeover);
+      card.style.setProperty('--stack-covered', `${card.offsetHeight * covered}px`);
     });
   }
 }
@@ -59,6 +63,7 @@ function configureStacks() {
 addEventListener('scroll', requestStackFrame, { passive: true });
 addEventListener('resize', requestStackFrame);
 addEventListener('load', requestStackFrame);
+addEventListener('animationend', requestStackFrame);
 motionPreference.addEventListener('change', configureStacks);
 if ('ResizeObserver' in window) {
   const resize = new ResizeObserver(requestStackFrame);
