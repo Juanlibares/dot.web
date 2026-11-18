@@ -19,7 +19,7 @@ if ("IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: re
 // Keep every card in normal document flow so long content remains readable.
 const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 const stackGroups = [
-  [...document.querySelectorAll('#proyectos > .featured, #proyectos > .project, #proyectos > .more')],
+  [...document.querySelectorAll('#proyectos > .project')],
   [...document.querySelectorAll('.hire-grid > div')],
 ];
 let scrollFrame = 0;
